@@ -9,7 +9,8 @@ import { request } from "node:http";
 const CreateUserSchema = z.object({
     name: z.string(),
     email: z.email(),
-    idade: z.number({ error: "Coloque um numero valido" }).positive()
+    idade: z.number({ error: "Coloque um numero valido" }).positive(),
+    senha: z.string()
 })
 
 
@@ -21,8 +22,20 @@ export const userController = async (fastify: FastifyInstance) => {
         const novoUsuario = CreateUserSchema.parse(request.body)
 
         await prisma.user.create({ data: novoUsuario })
-    }
-    )
+    })
+    
+    fastify.post<{ Body: {email: string, senha: string} }>('/users/login', async (request, reply) => {
+
+        const { email, senha } = request.body
+        
+        const usuario = await prisma.user.findFirst({
+            where: { email, senha}
+        })
+        if (usuario) {
+            return usuario
+        }
+        return reply.statusCode = 404;
+    })
 
     fastify.put<{ Params: { id: string }, Body: { name: string, email: string } }>('/user/:id', async (request, reply) => {
         const { id } = request.params
@@ -35,10 +48,14 @@ export const userController = async (fastify: FastifyInstance) => {
         return emailAtualizado
     })
 
+
     fastify.get('/users', async (request, reply) => {
         const users = await prisma.user.findMany()
         return users
     })
+
+
+
 
     fastify.get<{ Params: { name: string } }>('/user/:name', {
     }, async (request, reply) => {
@@ -46,7 +63,10 @@ export const userController = async (fastify: FastifyInstance) => {
             where: { name: request.params?.name }
         })
 
-        if (!user) return reply.code(404).send('Usuário não encontrado!')
         return user
     })
+
+
+
+
 }
