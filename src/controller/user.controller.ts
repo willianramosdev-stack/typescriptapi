@@ -74,4 +74,13 @@ export const userController = async (fastify: FastifyInstance) => {
         return user
     })
 
+    //Endpoint para buscar transações usando o ID do usuario
+    fastify.get<{ Params: { id: string } }>('/user/:id/transactions', {
+    }, async (request, reply) => {
+        const transacao = await prisma.transactions.findMany({
+            where: { user_id: Number(request.params.id) }
+        })
+        return transacao
+    })
+
 }

@@ -12,4 +12,10 @@ export const transactionController = async (fastify: FastifyInstance) => {
         )
         return transacao
     })
+
+    fastify.get('/transactions', async (request, reply) => {
+        const transactions = await prisma.transactions.findMany()
+        return transactions
+    })
+    
 }
