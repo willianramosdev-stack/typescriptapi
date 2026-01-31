@@ -16,27 +16,36 @@ const CreateUserSchema = z.object({
 
 export const userController = async (fastify: FastifyInstance) => {
 
-
+    //Endpoint para criar usuario
     fastify.post<{ Body: CreateUserDTO }>('/register', async (request, reply) => {
 
         const novoUsuario = CreateUserSchema.parse(request.body)
 
         await prisma.user.create({ data: novoUsuario })
     })
-    
-    fastify.post<{ Body: {email: string, senha: string} }>('/users/login', async (request, reply) => {
+    //Endpoint para deletar usuario
+    fastify.delete<{ Params: { id: string } }>('/user/:id', {
+    }, async (request, reply) => {
+        const user = await prisma.user.delete({
+            where: { id: Number(request.params.id) }
+        })
+        return "Usuario " + user.name + " deletado com sucesso!"
+    })
+
+    //Endpoint para login
+    fastify.post<{ Body: { email: string, senha: string } }>('/users/login', async (request, reply) => {
 
         const { email, senha } = request.body
-        
+
         const usuario = await prisma.user.findFirst({
-            where: { email, senha}
+            where: { email, senha }
         })
         if (usuario) {
             return usuario
         }
         return reply.statusCode = 404;
     })
-
+    //Endpoint para atualizar usuario
     fastify.put<{ Params: { id: string }, Body: { name: string, email: string } }>('/user/:id', async (request, reply) => {
         const { id } = request.params
         const { name, email } = request.body
@@ -48,15 +57,14 @@ export const userController = async (fastify: FastifyInstance) => {
         return emailAtualizado
     })
 
-
+    //Endpoint para listar usuarios
     fastify.get('/users', async (request, reply) => {
         const users = await prisma.user.findMany()
         return users
     })
 
 
-
-
+    //Endpoint para buscar usuario usando o nome
     fastify.get<{ Params: { name: string } }>('/user/:name', {
     }, async (request, reply) => {
         const user = await prisma.user.findFirst({
@@ -65,8 +73,5 @@ export const userController = async (fastify: FastifyInstance) => {
 
         return user
     })
-
-
-
 
 }
