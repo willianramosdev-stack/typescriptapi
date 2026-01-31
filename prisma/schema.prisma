@@ -23,4 +23,8 @@ model Transactions {
   id      Int  @id @default(autoincrement())
   user    User @relation(fields: [user_id], references: [id])
   user_id Int
+  nomeProduto String
+  quantidade  Int
+  preco Int
+
 }
