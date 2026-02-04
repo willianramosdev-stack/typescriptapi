@@ -9,20 +9,19 @@ import { request } from "node:http";
 const CreateUserSchema = z.object({
     name: z.string(),
     email: z.email(),
-    idade: z.number({ error: "Coloque um numero valido" }).positive(),
-    senha: z.string()
+    age: z.number({ error: "Coloque um numero valido" }).positive(),
+    password: z.string().min(8, { message: "A senha deve ter no minimo 6 caracteres" })
 })
 
 
 export const userController = async (fastify: FastifyInstance) => {
 
-    //Endpoint para criar usuario
-    fastify.post<{ Body: CreateUserDTO }>('/register', async (request, reply) => {
+    fastify.post<{ body: CreateUserSchema }>
 
-        const novoUsuario = CreateUserSchema.parse(request.body)
 
-        await prisma.user.create({ data: novoUsuario })
-    })
+
+
+
     //Endpoint para deletar usuario
     fastify.delete<{ Params: { id: string } }>('/user/:id', {
     }, async (request, reply) => {
